@@ -14,8 +14,8 @@ class Home extends CI_Controller {
             'h1' => 'HomePage',
             'description' => 'Crud de Categorias e Produtos desenvolvido com o <strong><i>Framework CodeIgniter 3.1.11 e MySQL 5.6</i></strong>',
         ];
-        $this->load->view('header', $data);
-        $this->load->view('home', $data);
-        $this->load->view('footer');
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/home', $data);
+        $this->load->view('templates/footer');
     }
 }

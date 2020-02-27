@@ -24,23 +24,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$isSecure = false;
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-    $isSecure = true;
-}
-elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
-    $isSecure = true;
-}
-else if(isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'){
-    $isSecure = true;
-}
-else if(isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
-    $isSecure = true;
-}
-
-$REQUEST_PROTOCOL = $isSecure ? 'https://' : 'http://';
-
-$config['base_url'] = $REQUEST_PROTOCOL.$_SERVER['HTTP_HOST'].str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__FILE__, 3));
+$http_s = is_https() ? 'https://' : 'http://';
+$config['base_url'] = $http_s.$_SERVER['HTTP_HOST'].str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__FILE__, 3));
 
 /*
 |--------------------------------------------------------------------------
@@ -341,7 +326,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'mfabiodias@gmail.com';
 
 /*
 |--------------------------------------------------------------------------

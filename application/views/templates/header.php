@@ -59,16 +59,16 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="<?php echo base_url(); ?>">Home <span class="sr-only">(current)</span></a>
+            <li class="nav-item <?php echo (!$this->uri->segment(1) ? 'active' : ''); ?>">
+                <a class="nav-link" href="<?php echo base_url(); ?>">Home</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item <?php echo ($this->uri->segment(1) == 'category' ? 'active' : ''); ?>">
                 <a class="nav-link" href="<?php echo base_url('/category'); ?>">Categorias</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item <?php echo ($this->uri->segment(1) == 'product' ? 'active' : ''); ?>">
                 <a class="nav-link" href="<?php echo base_url('/product'); ?>">Produtos</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item <?php echo ($this->uri->segment(1) == 'contact' ? 'active' : ''); ?>">
                 <a class="nav-link" href="<?php echo base_url('/contact'); ?>">Contato</a>
             </li>
         </ul>

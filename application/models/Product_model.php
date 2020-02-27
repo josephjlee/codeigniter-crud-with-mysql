@@ -8,45 +8,35 @@ class Product_model extends CI_Model
         parent::__construct();
     }
 
-    public function getAll()
+    public function get($where=[], $limit='', $offset='')
     {
-        $sql = 
-        '
-            SELECT p.id_product, c.name AS category, p.name,
-                p.description, p.price, p.url, p.createdAt, p.updatedAt 
-            FROM product p
-            JOIN category c ON (c.id_category = p.id_category)
-        ';
-        return $this->db->query(trim($sql));
-    }
-    
-    public function getOne($where="")
-    {
-        $sql = "SELECT * FROM product {$where}";
-        return $this->db->query($sql);
+        $this->db->select('p.*, c.name AS category');
+        $this->db->from('product p');
+        $this->db->join('category c', 'c.id_category = p.id_category');
+        $this->db->where($where);
+        $query = $this->db->get('', $limit, $offset);
+
+        return $query->result();
     }
 
-    public function delete($id)
+    public function delete($where=[])
     {
-        $sql = 'DELETE FROM product WHERE id_product = ?';
-        $prm = [$id];
-        $this->db->query($sql, $prm);
+        $this->db->delete('product', $where);
         return $this->db->affected_rows();
     }
     
     public function insert($data)
     {
-        $sql = 'INSERT INTO product (id_category, name, description, price, url) VALUES (?,?,?,?,?)';
-        $prm = [$data['id_category'], $data['name'], $data['description'], $data['price'], $data['url']];
-        $this->db->query($sql, $prm);
+        clean_empty_field($data);
+        $this->db->insert('product', $data);
         return $this->db->insert_id();
     }
 
-    public function update($data)
+    public function update($id, $data)
     {
-        $sql = 'UPDATE product SET id_category = ?, name = ?, description = ?, price = ?, url = ?, updatedAt = ? WHERE id_product = ?';
-        $prm = [$data['id_category'], $data['name'], $data['description'], $data['price'], $data['url'], date('Y-m-d H:i:s'), $data['id_product']];
-        $this->db->query($sql, $prm);
+        $data['updatedAt'] = date('Y-m-d H:i:s');
+        clean_empty_field($data);
+        $this->db->update('product', $data, array('id_product' => $id));
         return $this->db->affected_rows();
     }
 }

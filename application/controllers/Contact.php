@@ -5,7 +5,7 @@ class Contact extends CI_Controller {
 
     public function __construct(){
         parent::__construct();
-        //$this->load->helper('url');
+        //$this->output->cache(2);
     }
 
 	public function index(){
@@ -48,8 +48,8 @@ class Contact extends CI_Controller {
         }
 
         
-        $this->load->view('header', $data);
-        $this->load->view('contact', $data);
-        $this->load->view('footer');
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/contact', $data);
+        $this->load->view('templates/footer');
 	}
 }

@@ -31,8 +31,13 @@
 				</div>
 				<div class="form-group col">
 					<label for="url">Url</label>
-					<input type="text" class="form-control" id="url" name="url" 
+					<input type="text" class="form-control <?php if(form_error('url')) { echo 'is-invalid';} ?>" id="url" name="url" 
 						value="<?php echo ($upt->url ? $upt->url : ((!$form_status || $form_alert == 'alert-danger') ? set_value('url') : '')); ?>" placeholder="celulares">
+					<?php if(form_error('url')): ?>
+					<div class="invalid-feedback">
+						<?php echo form_error('url'); ?>
+					</div>
+					<?php endif; ?>
 				</div>
 			</div>
 			<button type="submit" class="btn btn-primary"><?php echo $btn; ?></button>

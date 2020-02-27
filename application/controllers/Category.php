@@ -7,6 +7,8 @@ class Category extends CI_Controller {
         parent::__construct();
         $this->load->model('Category_model', 'categories');
         $this->load->model('Product_model', 'products');
+        //$this->output->cache(1);
+        //$this->output->enable_profiler(TRUE);
     }
 
 	public function index(){
@@ -14,7 +16,7 @@ class Category extends CI_Controller {
         $data = [
             'title' => 'Categorias | CodeIgniter 3.1.11',
             'h1' => 'Categorias',
-            'categories' => $this->categories->getAll()->result(),
+            'categories' => $this->categories->get(),
         ];
 
         if(isset($_SESSION["redirect_data"]))
@@ -29,9 +31,9 @@ class Category extends CI_Controller {
             $data['msg_label'] = false;
         }
         
-        $this->load->view('header', $data);
-        $this->load->view('list_category', $data);
-        $this->load->view('footer');
+        $this->load->view('templates/header', $data);
+        $this->load->view('categories/list_category', $data);
+        $this->load->view('templates/footer');
     }
 
     public function delete()
@@ -40,14 +42,14 @@ class Category extends CI_Controller {
 
         $data = [];
         
-        if(!!$this->products->getOne("WHERE id_category = '{$id}'")->result())
+        if(!!$this->products->get(['p.id_category' => $id]))
         {
             $data['msg_type'] = 'alert-danger';
             $data['msg_label'] = "Categoria tem produtos vinculados e não é permitida sua remoção.";
         }
         else
         {
-            $rtn = $this->categories->delete($id);
+            $rtn = $this->categories->delete(['id_category' => $id]);
     
             if($rtn){
                 $data['msg_type'] = 'alert-success';
@@ -81,7 +83,7 @@ class Category extends CI_Controller {
             $data['h1'] = 'Atualizar Categoria';
             $data['btn'] = 'Atualizar';
 
-            $upt = $this->categories->getOne("WHERE id_category = '{$id}'")->result();
+            $upt = $this->categories->get(['id_category' => $id]);
 
             if(!$upt)
             {
@@ -107,6 +109,7 @@ class Category extends CI_Controller {
         
         $this->load->helper(['form','funcoes_helper']);
         $this->load->library('form_validation');
+        $this->form_validation->set_rules('url', 'URL', "callback_unique_url[$id]");
         $this->form_validation->set_rules('name', 'Nome Categoria', 'trim|required');
 
         $is_valid = $this->form_validation->run();
@@ -116,59 +119,65 @@ class Category extends CI_Controller {
             $dados_form = $this->input->post();
 
             if(!!trim($dados_form['url'])):
-                $dados_form['url'] = urlSlug($dados_form['url']);
+                $dados_form['url'] = url_slug($dados_form['url']);
             else:
-                $dados_form['url'] = urlSlug($dados_form['name']);
+                $dados_form['url'] = url_slug($dados_form['name']);
             endif;
-
-            if(!!$this->categories->getOne("WHERE url = '".$dados_form['url']."'" . ($id ? " AND id_category <> {$id}" : ""))->result())
+            
+            if($id)
             {
-                $data['form_status'] = true;
-                $data['form_alert'] = 'alert-danger';
-                $data['form_msg'] = 'URL já encontra-se registrado na base de dados!';
-            }
-            else
-            {
-                if($id)
+                if($this->categories->update($id, $dados_form))
                 {
-                    $dados_form['id_category'] = $id;
-                    
-                    if($this->categories->update($dados_form))
-                    {
-                        $data['msg_type'] = 'alert-success';
-                        $data['msg_label'] = "Categoria ID: {$id} atualizado com sucesso!";
-        
-                        $_SESSION["redirect_data"] = $data;
-                    
-                        redirect('/category', 'refresh');
-                    }
-                    else
-                    {
-                        $data['form_status'] = true;
-                        $data['form_alert'] = 'alert-danger';
-                        $data['form_msg'] = 'Falha ao cadastrar categoria, contate o administrador!';
-                    }
+                    $data['msg_type'] = 'alert-success';
+                    $data['msg_label'] = "Categoria ID: {$id} atualizado com sucesso!";
+    
+                    $_SESSION["redirect_data"] = $data;
+                
+                    redirect('/category', 'refresh');
                 }
                 else
                 {
-                    if($this->categories->insert($dados_form))
-                    {
-                        $data['form_status'] = true;
-                        $data['form_alert'] = 'alert-success';
-                        $data['form_msg'] = 'Categoria cadastrada com sucesso!';
-                    }
-                    else
-                    {
-                        $data['form_status'] = true;
-                        $data['form_alert'] = 'alert-danger';
-                        $data['form_msg'] = 'Falha ao cadastrar categoria, contate o administrador!';
-                    }
+                    $data['form_status'] = true;
+                    $data['form_alert'] = 'alert-danger';
+                    $data['form_msg'] = 'Falha ao cadastrar categoria, contate o administrador!';
+                }
+            }
+            else
+            {
+                if($this->categories->insert($dados_form))
+                {
+                    $data['form_status'] = true;
+                    $data['form_alert'] = 'alert-success';
+                    $data['form_msg'] = 'Categoria cadastrada com sucesso!';
+                }
+                else
+                {
+                    $data['form_status'] = true;
+                    $data['form_alert'] = 'alert-danger';
+                    $data['form_msg'] = 'Falha ao cadastrar categoria, contate o administrador!';
                 }
             }
         }
         
-        $this->load->view('header', $data);
-        $this->load->view('upsert_category', $data);
-        $this->load->view('footer');
+        $this->load->view('templates/header', $data);
+        $this->load->view('categories/upsert_category', $data);
+        $this->load->view('templates/footer');
+    }
+
+    function unique_url($url, $id)
+    {    
+        if($id): 
+            $url_where = ['url' => $url, 'id_category !=' => $id];
+        else:
+            $url_where = ['url' => $url];
+        endif;
+
+        if(!!$this->categories->get($url_where))
+        {
+            $this->form_validation->set_message('unique_url', "{field} '{$url}' já encontra-se registrada. Informe outra {field}.");
+            return FALSE;
+        }
+
+        return TRUE;
     }
 }
